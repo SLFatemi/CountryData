@@ -1,16 +1,16 @@
 'use strict';
 
-
+//
 // NEW COUNTRIES API URL (use instead of the URL shown in videos):
 // https://restcountries.com/v2/name/portugal
-
+//
 // NEW REVERSE GEOCODING API URL (use instead of the URL shown in videos):
 // https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}
 
-///////////////////////////////////////
+/////////////////////////////////////
 
 
-/////////////////////////// Sleep implementation
+///////////////////////// Sleep implementation
 // function sleep(ms) {
 //   return new Promise(resolve => setTimeout(() => resolve('ali'), ms));
 // }
@@ -28,13 +28,6 @@
 const btnName = document.querySelector('.btn-name');
 const btnCountry = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
-// PART 1
-// 1. Create a function 'whereAmI' which takes as inputs a latitude value (lat) and a longitude value (lng) (these are GPS coordinates, examples are below).
-// 2. Do 'reverse geocoding' of the provided coordinates. Reverse geocoding means to convert coordinates to a meaningful location, like a city and country name. Use this API to do reverse geocoding: https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}.
-// The AJAX call will be done to a URL with this format: https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=52.508&longitude=13.381. Use the fetch API and promises to get the data. Do NOT use the getJSON function we created, that is cheating 😉
-// 3. Once you have the data, take a look at it in the console to see all the attributes that you recieved about the provided location. Then, using this data, log a messsage like this to the console: 'You are in Berlin, Germany'
-// 4. Chain a .catch method to the end of the promise chain and log errors to the console
-// 5. This API allows you to make only 3 requests per second. If you reload fast, you will get this error with code 403. This is an error with the request. Remember, fetch() does NOT reject the promise in this case. So create an error to reject the promise yourself, with a meaningful error message.
 
 function getHTML(data, className = '') {
   return `
@@ -68,7 +61,6 @@ async function reverseGeocoding(lat, lng) {
   return null;
 }
 
-
 async function whereAmI() {
   countriesContainer.innerHTML = '';
   let [lat, lng] = [0, 0];
@@ -78,14 +70,15 @@ async function whereAmI() {
     const countryData = (await reverseGeocoding(lat, lng));
     alert(`You are in ${countryData.city}, ${countryData.countryName}`);
     const res = await fetchDataCountry(countryData.countryName);
-    showCountry(res);
+    renderCountry(res);
     await getAndShowNeighbours(res);
   } catch (e) {
+    alert(e.message);
   }
   return null;
 }
 
-function showCountry(res, className = '') {
+function renderCountry(res, className = '') {
   const html = getHTML(res, className);
   countriesContainer.insertAdjacentHTML('beforeend', html);
   countriesContainer.style.opacity = 1;
@@ -98,7 +91,7 @@ async function getAndShowNeighbours(res) {
       const res = await fetchDataNeighbour(neighbourCountry);
       if (!res)
         return;
-      showCountry(res, 'neighbour');
+      renderCountry(res, 'neighbour');
     }
   }
 }
@@ -130,9 +123,131 @@ async function countryName() {
   const country = prompt('Enter the name of your desired country');
   const res = await fetchDataCountry(country);
   if (!res) return;
-  showCountry(res);
+  renderCountry(res);
   await getAndShowNeighbours(res);
 }
 
 btnName.addEventListener('click', countryName);
 btnCountry.addEventListener('click', whereAmI);
+
+////////////////////// MAKING A NEW PROMISE /////////////////////////////
+// WRONG!
+// function lotteryPromise() {
+//   return new Promise(function(resolve, reject) {
+//     if (Math.random() >= 0.5) resolve();
+//     else reject();
+//   });
+// }
+//`
+// function lotteryPromise() {
+//   console.log('Lottery draw is happening 🔮');
+//   return new Promise(function(resolve) {
+//     setTimeout(() => {
+//       if (Math.random() >= 0.5) resolve('You won 💰');
+//       else resolve('You lost 💩');
+//     }, 3000);
+//   });
+// }
+//
+//
+// async function main() {
+//   for (let i = 1; i < 1000; i++) {
+//     console.log(i);
+//     await promisifiedSetTimeOut(1000);
+//   }
+//   // try {
+//   //   const result = await lotteryPromise();
+//   //   alert(result);
+//   // } catch (e) {
+//   // }
+//   // return null;
+// }
+//
+// //
+// // async function somethingElse() {
+// //   await promisifiedSetTimeOut(5000);
+// //   for (let i = 1; i < 1000; i++) {
+// //     console.log('Yep');
+// //   }
+// // }
+//
+// function promisifiedSetTimeOut(timeout) {
+//   return new Promise(resolve => {
+//     setTimeout(resolve, timeout);
+//   });
+// }
+//
+// main();
+// // somethingElse();
+//
+// function sleep(ms) {
+//   return new Promise(resolve => {
+//     setTimeout(resolve, ms);
+//   });
+// }
+//
+//
+// function createImage(imgPath) {
+//   return new Promise((resolve, reject) => {
+//     const img = document.createElement('img');
+//     img.style.display = 'inline-block';
+//     img.src = imgPath;
+//     img.addEventListener('load', () => {
+//       resolve(img);
+//     });
+//     img.addEventListener('error', () => {
+//       reject('There was an Error');
+//     });
+//   });
+// }
+//
+// async function loadAll(imgArr) {
+//   try {
+//     const imgs = imgArr.map(async imgPath =>
+//       await createImage(imgPath));
+//     const imgsEl = await Promise.all(imgs);
+//     imgsEl.forEach((img) => {
+//       img.classList.add('parallel');
+//     });
+//     return imgsEl;
+//
+//   } catch (e) {
+//   }
+//   return null;
+//
+// }
+//
+// function renderImages(imgs) {
+//   document.querySelector('.images').innerHTML = '';
+//   for (let img of imgs) {
+//     document.querySelector('.images').insertAdjacentElement('beforeend', img);
+//   }
+// }
+//
+// async function main() {
+//   try {
+//     const images = await loadAll(['img/img-1.jpg', 'img/img-2.jpg', 'img/img-3.jpg']);
+//     renderImages(images);
+//   } catch (e) {
+//     console.error(e);
+//   }
+//   return null;
+// }
+//
+// main();
+//
+
+// async function get3Countries(c1, c2, c3) {
+//   const fetches = [
+//     fetch(`https://restcountries.com/v2/name/${c1}`),
+//     fetch(`https://restcountries.com/v2/name/${c2}`),
+//     fetch(`https://restcountries.com/v2/name/${c3}`)
+//   ];
+//   const response = await Promise.all(fetches);
+//   const jsonResponse = response.map((res) => res.json());
+//   const data = await Promise.allSettled(jsonResponse);
+//   console.log(data.map((d) => d?.value[0]?.capital));
+// }
+//
+// get3Countries('Germany', 'Sweden', 'Denmark');
+//
